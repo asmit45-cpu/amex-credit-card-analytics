@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>AmEx-Style Credit Card Analytics Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--tx:#0b1b3a;--mu:#5b6b85;--b:#006FCF;--n:#00175A;--r:#d64545;--ln:#dbe3ef;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0b1220;--card:#131d33;--tx:#e8eefb;--mu:#93a3c0;--ln:#25324e;--b:#4da3ff}}
+:root[data-theme="dark"]{--bg:#0b1220;--card:#131d33;--tx:#e8eefb;--mu:#93a3c0;--ln:#25324e;--b:#4da3ff}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--tx)}
+header{background:#00175A;color:#fff;padding:14px 16px}header h1{margin:0;font-size:17px}header p{margin:4px 0 0;font-size:11px;opacity:.8}
+nav{display:flex;gap:6px;padding:10px 12px;overflow-x:auto;position:sticky;top:0;background:var(--bg);z-index:5}
+nav button{border:1px solid var(--ln);background:var(--card);color:var(--tx);padding:8px 12px;border-radius:18px;font-size:13px;white-space:nowrap}
+nav button.on{background:#006FCF;color:#fff;border-color:#006FCF}
+.pg{display:none;padding:0 12px 20px}.pg.on{display:block}
+.k{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.c{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:10px 12px}
+.c b{display:block;font-size:20px;color:var(--b)}.c span{font-size:11px;color:var(--mu)}
+.ch{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:10px;margin-bottom:10px}
+.ch h3{margin:0 0 6px;font-size:13px}.ch small{color:var(--mu);font-size:11px}
+.w{position:relative;height:220px}
+.t{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:12px}th,td{padding:6px;border-bottom:1px solid var(--ln);text-align:left;white-space:nowrap}th{color:var(--mu)}
+.tag{background:#fde8e8;color:#b32d2d;padding:2px 6px;border-radius:8px;font-size:11px}
+footer{font-size:10px;color:var(--mu);padding:0 14px 16px}
+</style></head><body>
+<header><h1>AmEx-Style Credit Card Analytics</h1><p>Fraud, Churn &amp; Spend | Synthetic dataset | 1,500 customers, 60K transactions</p></header>
+<nav><button class="on" data-p="0">Portfolio</button><button data-p="1">Fraud</button><button data-p="2">Churn Risk</button></nav>
+<div class="pg on" id="p0"><div class="k" id="k0"></div>
+<div class="ch"><h3>Monthly spend trend</h3><div class="w"><canvas id="a"></canvas></div></div>
+<div class="ch"><h3>Avg lifetime spend per customer by card</h3><div class="w"><canvas id="b"></canvas></div><small id="bn"></small></div>
+<div class="ch"><h3>Spend mix by category</h3><div class="w"><canvas id="c"></canvas></div></div></div>
+<div class="pg" id="p1"><div class="k" id="k1"></div>
+<div class="ch"><h3>Fraud rate % by merchant category</h3><div class="w"><canvas id="d"></canvas></div></div>
+<div class="ch"><h3>Fraud rate % by hour of day</h3><div class="w"><canvas id="e"></canvas></div></div>
+<div class="ch"><h3>Fraud review list (top by amount)</h3><div class="t"><table id="ft"></table></div></div></div>
+<div class="pg" id="p2"><div class="k" id="k2"></div>
+<div class="ch"><h3>High-risk customers by card type</h3><div class="w"><canvas id="f"></canvas></div></div>
+<div class="ch"><h3>Momentum % vs risk score</h3><div class="w"><canvas id="g"></canvas></div></div>
+<div class="ch"><h3>Retention call list (top 10)</h3><div class="t"><table id="rt"></table></div></div></div>
+<footer>Data is synthetic (generated for this project). Built with SQL, Python and Excel; charts rendered from the project's aggregated CSV outputs.</footer>
+<script>
+const D={"kpi": {"spend": 1365015046.4199998, "txn": 910638, "cust": 1500, "avg": 910010.0309466666, "fraud": 702, "ntx": 60000, "risk": 180, "avgamt": 11013.992581166667}, "month": {"2022-07": 57036883.0, "2022-08": 53782299.0, "2022-09": 52961375.0, "2022-10": 58222513.0, "2022-11": 64692676.0, "2022-12": 70009398.0, "2023-01": 49013229.0, "2023-02": 49117592.0, "2023-03": 52253337.0, "2023-04": 54609413.0, "2023-05": 62011327.0, "2023-06": 63837155.0, "2023-07": 56783824.0, "2023-08": 54096018.0, "2023-09": 53628304.0, "2023-10": 59101529.0, "2023-11": 65071235.0, "2023-12": 70051494.0, "2024-01": 48470738.0, "2024-02": 47929057.0, "2024-03": 50570081.0, "2024-04": 52440173.0, "2024-05": 59197886.0, "2024-06": 60127512.0}, "cat": {"Travel": 367657922.0, "Online Shopping": 225098484.0, "Grocery": 201891971.0, "Dining": 158224583.0, "Fuel": 131684672.0, "Utilities": 110816766.0, "Healthcare": 87974021.0, "Entertainment": 81666627.0}, "card": {"Centurion": 2723865.0, "Gold": 764316.0, "Green": 549885.0, "Platinum": 1407702.0}, "cardn": {"Green": 670, "Gold": 445, "Platinum": 298, "Centurion": 87}, "fcat": {"Healthcare": 1.37, "Entertainment": 1.25, "Jewellery": 1.25, "Electronics": 1.21, "Online Shopping": 1.19, "Grocery": 1.17, "Travel": 1.09, "Dining": 1.08, "Fuel": 1.07, "Utilities": 1.02}, "fhr": {"0": 0.0, "1": 43.3, "2": 31.38, "3": 21.04, "4": 14.97, "5": 0.0, "6": 0.0, "7": 0.0, "8": 0.0, "9": 0.0, "10": 0.0, "11": 0.0, "12": 0.0, "13": 0.0, "14": 0.0, "15": 0.0, "16": 0.0, "17": 0.0, "18": 0.0, "19": 0.0, "20": 0.0, "21": 0.0, "22": 0.0, "23": 3.06}, "ftop": [["TXN0002989", "CUST00222", 416380.0, "Jewellery", 4], ["TXN0002428", "CUST00789", 414680.0, "Jewellery", 2], ["TXN0053322", "CUST00872", 411295.0, "Jewellery", 1], ["TXN0050377", "CUST01064", 409406.0, "Jewellery", 1], ["TXN0057500", "CUST00660", 406208.0, "Jewellery", 1], ["TXN0029437", "CUST01340", 405146.0, "Jewellery", 2], ["TXN0055229", "CUST01393", 404382.0, "Jewellery", 2], ["TXN0022107", "CUST00442", 395480.0, "Jewellery", 4]], "rtop": [["CUST01360", "Green", -71.85, 1.0], ["CUST00908", "Platinum", -70.49, 1.0], ["CUST00355", "Gold", -72.15, 1.0], ["CUST00165", "Platinum", -72.12, 1.0], ["CUST00912", "Gold", -73.56, 1.0], ["CUST00170", "Gold", -72.34, 1.0], ["CUST00916", "Green", -71.62, 1.0], ["CUST00349", "Green", -73.0, 1.0], ["CUST00664", "Green", -72.64, 1.0], ["CUST01344", "Green", -74.03, 1.0]], "rcard": {"Green": 87, "Gold": 52, "Platinum": 33, "Centurion": 8}, "sc": [[-73.18, 1.0], [-73.17, 1.0], [-74.46, 1.0], [-71.86, 1.0], [-71.86, 1.0], [-68.63, 1.0], [-71.37, 1.0], [-71.35, 1.0], [-72.11, 1.0], [-71.69, 1.0], [-73.26, 1.0], [-73.32, 1.0], [-73.35, 1.0], [-70.92, 1.0], [-73.56, 1.0], [-75.3, 1.0], [-72.1, 1.0], [-69.17, 1.0], [-72.53, 1.0], [-72.2, 1.0], [-72.5, 1.0], [-74.37, 1.0], [-76.76, 1.0], [-70.72, 1.0], [-76.49, 1.0], [-71.58, 1.0], [-73.89, 1.0], [-74.12, 1.0], [-71.36, 1.0], [-72.96, 1.0], [-70.95, 1.0], [-73.68, 1.0], [-74.69, 1.0], [-70.73, 1.0], [-72.34, 1.0], [-71.14, 1.0], [-70.17, 1.0], [-72.25, 1.0], [-71.49, 1.0], [-70.95, 1.0], [-74.19, 1.0], [-71.01, 1.0], [-73.22, 1.0], [-71.36, 1.0], [-70.32, 1.0], [-70.72, 1.0], [-74.64, 1.0], [-69.53, 1.0], [-70.21, 1.0], [-70.84, 1.0], [-71.21, 1.0], [-72.75, 1.0], [-68.24, 1.0], [-69.29, 1.0], [-71.93, 1.0], [-70.98, 1.0], [-70.91, 1.0], [-72.66, 1.0], [-70.11, 1.0], [-70.41, 1.0], [-72.15, 1.0], [-70.51, 1.0], [-69.82, 1.0], [-72.91, 1.0], [-75.05, 1.0], [-70.05, 1.0], [-71.04, 1.0], [-70.0, 1.0], [-74.01, 1.0], [-73.73, 1.0], [-69.37, 1.0], [-73.59, 1.0], [-74.35, 1.0], [-68.65, 1.0], [-69.88, 1.0], [-71.74, 1.0], [-71.25, 1.0], [-69.73, 1.0], [-72.64, 1.0], [-67.86, 1.0], [-72.34, 1.0], [-72.15, 1.0], [-71.45, 1.0], [-73.18, 1.0], [-71.62, 1.0], [-70.33, 1.0], [-71.85, 1.0], [-70.08, 1.0], [-74.31, 1.0], [-70.9, 1.0], [-73.43, 1.0], [-73.13, 1.0], [-70.36, 1.0], [-70.65, 1.0], [-70.83, 1.0], [-71.06, 1.0], [-71.85, 1.0], [-71.94, 1.0], [-71.61, 1.0], [-71.83, 1.0], [-72.77, 1.0], [-74.67, 1.0], [-73.13, 1.0], [-74.63, 1.0], [-74.42, 1.0], [-70.29, 1.0], [-67.99, 1.0], [-71.78, 1.0], [-71.5, 1.0], [-72.3, 1.0], [-70.79, 1.0], [-74.49, 1.0], [-72.69, 1.0], [-70.51, 1.0], [-72.37, 1.0], [-70.78, 1.0], [-74.03, 1.0], [-71.86, 1.0], [-71.26, 1.0], [-67.94, 1.0]]};
+const f=n=>n>=1e7?'₹'+(n/1e7).toFixed(1)+' Cr':n>=1e5?'₹'+(n/1e5).toFixed(1)+' L':'₹'+Math.round(n).toLocaleString('en-IN');
+const K=(id,a)=>document.getElementById(id).innerHTML=a.map(x=>`<div class="c"><b>${x[0]}</b><span>${x[1]}</span></div>`).join('');
+const k=D.kpi;
+K('k0',[[f(k.spend),'Total Spend'],[k.txn.toLocaleString('en-IN'),'Total Transactions'],[f(k.avg),'Avg Spend / Customer'],[k.cust.toLocaleString(),'Customers']]);
+K('k1',[[k.fraud,'Fraud Count'],[(k.fraud/k.ntx*100).toFixed(2)+'%','Fraud Rate'],['₹'+Math.round(k.avgamt).toLocaleString('en-IN'),'Avg Txn Amount']]);
+K('k2',[[k.risk,'High-Risk Customers'],[(k.risk/k.cust*100).toFixed(0)+'%','of Portfolio']]);
+const B='#006FCF',N='#00175A',R='#d64545',P=['#006FCF','#00175A','#4da3ff','#7fb8e8','#2a4d8f','#9bb7d9','#5b6b85','#b5c7e3'];
+const o=(x={})=>({responsive:true,maintainRatio:false,maintainAspectRatio:false,plugins:{legend:{display:false}},...x});
+const ks=Object.keys,vs=Object.values;
+new Chart(a,{type:'line',data:{labels:ks(D.month),datasets:[{data:vs(D.month),borderColor:B,backgroundColor:'rgba(0,111,207,.12)',fill:true,pointRadius:0,tension:.3}]},options:o({scales:{x:{ticks:{maxTicksLimit:6}},y:{ticks:{callback:v=>f(v)}}}})});
+new Chart(b,{type:'bar',data:{labels:ks(D.card),datasets:[{data:vs(D.card),backgroundColor:[N,B,'#4da3ff','#9bb7d9']}]},options:o({scales:{y:{ticks:{callback:v=>f(v)}}}})});
+bn.textContent='Customers: '+ks(D.cardn).map(x=>x+' '+D.cardn[x]).join(' | ');
+new Chart(c,{type:'doughnut',data:{labels:ks(D.cat),datasets:[{data:vs(D.cat),backgroundColor:P}]},options:o({plugins:{legend:{display:true,position:'right',labels:{boxWidth:10,font:{size:10}}}}})});
+new Chart(d,{type:'bar',data:{labels:ks(D.fcat),datasets:[{data:vs(D.fcat),backgroundColor:R}]},options:o({indexAxis:'y'})});
+new Chart(e,{type:'line',data:{labels:ks(D.fhr),datasets:[{data:vs(D.fhr),borderColor:R,pointRadius:2}]},options:o()});
+const tb=(id,h,rows)=>document.getElementById(id).innerHTML='<tr>'+h.map(x=>'<th>'+x+'</th>').join('')+'</tr>'+rows.map(r=>'<tr>'+r.map(x=>'<td>'+x+'</td>').join('')+'</tr>').join('');
+tb('ft',['Txn ID','Customer','Amount','Category','Hour'],D.ftop.map(r=>[r[0],r[1],'₹'+r[2].toLocaleString('en-IN'),r[3],r[4]+':00']));
+new Chart(f,{type:'bar',data:{labels:ks(D.rcard),datasets:[{data:vs(D.rcard),backgroundColor:B}]},options:o()});
+new Chart(g,{type:'scatter',data:{datasets:[{data:D.sc.map(p=>({x:p[0],y:p[1]})),backgroundColor:R}]},options:o({scales:{x:{title:{display:true,text:'Momentum %'}},y:{title:{display:true,text:'Risk score'}}}})});
+tb('rt',['Customer','Card','Momentum %','Risk'],D.rtop.map(r=>[r[0],r[1],r[2],'<span class="tag">'+r[3]+'</span>']));
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('nav button,.pg').forEach(e=>e.classList.remove('on'));b.classList.add('on');document.getElementById('p'+b.dataset.p).classList.add('on');window.dispatchEvent(new Event('resize'))});
+</script></body></html>
