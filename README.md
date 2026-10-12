@@ -35,12 +35,12 @@ A card issuer with 1,500 customers (4 card tiers, 8 spend categories, 24 months)
 |---|---|
 | Portfolio | Centurion cardholders are ~6% of customers but average about 5x the lifetime spend of a Green cardholder |
 | Spend mix | Travel and Online Shopping together drive over 40% of total spend |
-| Fraud | Healthcare and Jewellery show the highest fraud rates; fraud spikes between 1-4 AM |
+| Fraud | Fraud rate is similar across merchant categories (about 1.0-1.4%, Healthcare slightly highest), so category alone is a weak signal; fraud is concentrated between 1-4 AM and in high-amount, far-from-home transactions |
 | Fraud model | At the tuned threshold the model caught 131 of 175 test-set frauds (~Rs 81.7 lakh), with 0 genuine transactions flagged |
 | Churn | 180 customers (12%) flagged high-risk, about Rs 2.09 crore of annualised spend at risk |
 
 ## Recommendations
-- Score Healthcare and Jewellery transactions first (highest fraud rates) and add extra checks for late-night hours.
+- Add step-up verification for late-night (1-4 AM), high-amount and far-from-home transactions, since these are the strongest fraud signals in the model.
 - Run a retention programme for the 180 flagged customers, prioritising Platinum and Centurion tiers. Retaining even 30% protects an estimated Rs 1.25 lakh of annual revenue (illustrative, ~2% take rate).
 
 ## Limitations
