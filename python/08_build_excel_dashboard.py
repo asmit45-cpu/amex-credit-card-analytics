@@ -111,7 +111,7 @@ r += 1
 findings = [
     ('Portfolio', 'Centurion cardholders are only ~6% of customers but average several times a Green cardholder in lifetime spend - confirming the top-tier segment as the highest-value group.'),
     ('Spend Mix', 'Travel and Online Shopping together drive over 40% of total portfolio spend - the two categories most worth prioritising for rewards/cashback partnerships.'),
-    ('Fraud', 'Healthcare and Jewellery merchant categories show the highest fraud rates; the model catches most fraud value at a tuned threshold with very few false alarms on the test set.'),
+    ('Fraud', 'Fraud rate is similar across merchant categories (about 1.0-1.4%), so category alone is a weak signal; fraud concentrates at 1-4 AM and in high-amount, far-from-home transactions, and the model catches most fraud value at a tuned threshold on the test set.'),
     ('Churn Risk', '180 customers (12% of the portfolio) are flagged high-risk by the churn model, representing a significant share of annualised spend at risk.'),
     ('Model Note', 'Both ML models show very clean separation on this synthetic dataset (near-perfect test scores) - a known limitation flagged in the README; production data would need re-validation with noisier, real-world signal.'),
 ]
@@ -127,8 +127,8 @@ r += 1
 ws.cell(row=r, column=2, value='Business Recommendation').font = Font(name=ARIAL, bold=True, size=12, color=NAVY)
 r += 1
 ws.cell(row=r, column=2, value=(
-    "Deploy the fraud model at the tuned threshold for real-time transaction scoring on Healthcare and Jewellery "
-    "categories first, where fraud rates are highest. Launch a retention program for the flagged churn-risk customers "
+    "Deploy the fraud model at the tuned threshold for real-time transaction scoring, with step-up verification "
+    "for late-night, high-amount and far-from-home transactions, the strongest fraud signals. Launch a retention program for the flagged churn-risk customers "
     "(priority to Platinum/Centurion tiers given their high lifetime value) - even a partial save-rate protects "
     "meaningful annual interchange/interest revenue from this cohort."
 )).font = normal_font
